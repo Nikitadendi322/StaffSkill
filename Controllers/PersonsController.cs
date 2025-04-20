@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using StaffSkill.Core.Model;
+using StaffSkill.Dto;
 using StaffSkill.Repository;
 
 namespace StaffSkill.Controllers
@@ -40,11 +41,25 @@ namespace StaffSkill.Controllers
         /// </summary>
         
         [HttpPost]
-        public async Task<ActionResult<Person>> Create(Person person)
+        public async Task<ActionResult<PersonDto>> Create(PersonDto personDto)
         {
+            var person = new Person
+            {
+                Name = personDto.Name,
+                DisplayName = personDto.DisplayName,
+                Skills = personDto.Skills.Select(s => new Skill
+                {
+                    Name = s.Name,
+                    Level = s.Level
+                }).ToList()
+            };
+
             await _repository.AddAsync(person);
+
+            // Возвращаем созданную сущность Person
             return CreatedAtAction(nameof(GetById), new { id = person.Id }, person);
         }
+
         /// <summary>
         /// Обновляет данные сотрудника согласно значениям, указанным в объекте Person в теле.
         /// Обновляет навыки сотрудника согласно указанному набору.
@@ -53,13 +68,25 @@ namespace StaffSkill.Controllers
         /// <param name="person"></param>
         /// <returns></returns>
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(long id, Person person)
+        public async Task<IActionResult> Update(long id, PersonDto personDto)
         {
-            if (id != person.Id)
-                return BadRequest();
+            var existingPerson = await _repository.GetByIdAsync(id);
+            if (existingPerson == null)
+            {
+                return NotFound();
+            }
+            existingPerson.Name = personDto.Name;
+            existingPerson.DisplayName = personDto.DisplayName;
+            existingPerson.Skills=personDto.Skills.Select(s=> new Skill
+            {
+                Name = s.Name,
+                Level = s.Level,
+                PersonId=id
+            }).ToList();
 
-            await _repository.UpdateAsync(person);
-            return NoContent();
+            await _repository.UpdateAsync(existingPerson);
+
+            return Ok(existingPerson);
         }
         /// <summary>
         /// Удаляет с указанным id сотрудника из системы.
