@@ -7,14 +7,14 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
-// Добавляем DbContext
+// Р”РѕР±Р°РІР»СЏРµРј DbContext
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Регистрируем репозиторий
+// Р РµРіРёСЃС‚СЂРёСЂСѓРµРј СЂРµРїРѕР·РёС‚РѕСЂРёР№
 builder.Services.AddScoped<IPersonRepository, PersonRepository>();
 
-// Добавляем Swagger
+// Р”РѕР±Р°РІР»СЏРµРј Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
