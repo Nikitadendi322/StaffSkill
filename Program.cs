@@ -1,22 +1,31 @@
+using Microsoft.EntityFrameworkCore;
+using StaffSkill.Repository;
+using StaffSkill;
+
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Добавляем сервисы
 builder.Services.AddControllers();
+
+// Добавляем DbContext
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Регистрируем репозиторий
+builder.Services.AddScoped<IPersonRepository, PersonRepository>();
+
+// Добавляем Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Настройка Swagger для всех окружений (не только Development)
-app.UseSwagger();
-app.UseSwaggerUI(c =>
+if (app.Environment.IsDevelopment())
 {
-    c.SwaggerEndpoint("/swagger/v1/swagger.json", "StaffSkills API");
-    c.RoutePrefix = "swagger"; // Делает Swagger доступным по /swagger
-});
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
 app.UseHttpsRedirection();
-app.UseAuthorization();
 app.MapControllers();
-
 app.Run();
