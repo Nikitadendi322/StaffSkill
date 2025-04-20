@@ -14,10 +14,10 @@ namespace StaffSkill
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Skill>()
-                
-                .HasOne(s => s.Person)
-                .WithMany(p => p.Skills)
+            modelBuilder.Entity<Person>()
+
+                .HasMany(p => p.Skills)          
+                .WithOne()          
                 .HasForeignKey(s => s.PersonId);
         }
     }
