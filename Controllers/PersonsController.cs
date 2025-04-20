@@ -15,6 +15,7 @@ namespace StaffSkill.Controllers
         {
             _repository = repository;
         }
+
         /// <summary>
         /// Возвращение массив обектов типа Person
         /// </summary>
@@ -25,17 +26,18 @@ namespace StaffSkill.Controllers
             var persons = await _repository.GetAllAsync();
             return Ok(persons);
         }
+
         /// <summary>
         /// Возвращает объект типа Person.
         /// </summary>
-        /// <param name="id">Уникальный индетификатор сотрудника</param>
-        /// <returns></returns>
+        
         [HttpGet("{id}")]
         public async Task<ActionResult<Person>> GetById(long id)
         {
             var person = await _repository.GetByIdAsync(id);
             return person != null ? Ok(person) : NotFound();
         }
+
         /// <summary>
         /// Создаёт нового сотрудника в системе с указанными навыками.
         /// </summary>
@@ -64,9 +66,7 @@ namespace StaffSkill.Controllers
         /// Обновляет данные сотрудника согласно значениям, указанным в объекте Person в теле.
         /// Обновляет навыки сотрудника согласно указанному набору.
         /// </summary>
-        /// <param name="id"></param>
-        /// <param name="person"></param>
-        /// <returns></returns>
+        
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(long id, PersonDto personDto)
         {
@@ -75,8 +75,14 @@ namespace StaffSkill.Controllers
             {
                 return NotFound();
             }
+
+            //Обновление только разрешенного поля
+
             existingPerson.Name = personDto.Name;
             existingPerson.DisplayName = personDto.DisplayName;
+
+            // Обновление Skills
+
             existingPerson.Skills=personDto.Skills.Select(s=> new Skill
             {
                 Name = s.Name,
@@ -88,11 +94,11 @@ namespace StaffSkill.Controllers
 
             return Ok(existingPerson);
         }
+
         /// <summary>
         /// Удаляет с указанным id сотрудника из системы.
         /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
+        
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(long id)
         {
