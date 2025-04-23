@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using StaffSkill.Repository;
 using StaffSkill;
+using StaffSkill.Middleware;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -28,6 +29,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.MapControllers();
+app.UseMiddleware<ExceptionMiddleware>();
 
 using (var scope = app.Services.CreateScope())
 {
