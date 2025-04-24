@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using StaffSkill.Core.Model;
 using StaffSkill.Dto;
-using StaffSkill.Repository;
 using StaffSkill.Service;
 
 namespace StaffSkill.Controllers
@@ -23,7 +22,7 @@ namespace StaffSkill.Controllers
         [HttpGet]
         public async Task<ActionResult<List<Person>>> GetAll()
         {
-            var persons = await _service.GetAllAsync();
+            var persons = await _service.GetAll();
             return Ok(persons);
         }
 
@@ -33,7 +32,7 @@ namespace StaffSkill.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Person>> GetById(long id)
         {
-            var person = await _service.GetByIdAsync(id);
+            var person = await _service.GetById(id);
             return person != null ? Ok(person) : NotFound();
         }
 
@@ -48,21 +47,10 @@ namespace StaffSkill.Controllers
                 return BadRequest(ModelState);
             }
 
-            var person = new Person
-            {
-                Name = personDto.Name,
-                DisplayName = personDto.DisplayName,
-                Skills = personDto.Skills.Select(s => new Skill
-                {
-                    Name = s.Name,
-                    Level = s.Level
-                }).ToList()
-            };
-
-            await _service.AddAsync(person);
+            var person = await _service.Create(personDto);
 
             // Возвращаем созданную сущность Person
-            return CreatedAtAction(nameof(GetById), new { id = person.Id }, person);
+            return CreatedAtAction(nameof(Create), new { id = person.Id }, person);
         }
 
         /// <summary>
@@ -77,27 +65,13 @@ namespace StaffSkill.Controllers
                 return BadRequest(ModelState);
             }
 
-            var existingPerson = await _service.GetAll();
-            if (existingPerson == null)
+            var person = await _service.Update(id, personDto);
+            if (person == null)
             {
                 return NotFound();
             }
 
-            //Обновление только разрешенного поля
-            _service.Name = personDto.Name;
-            existingPerson.DisplayName = personDto.DisplayName;
-
-            // Обновление Skills
-            existingPerson.Skills = personDto.Skills.Select(s => new Skill
-            {
-                Name = s.Name,
-                Level = s.Level,
-                PersonId = id
-            }).ToList();
-
-            await _service.UpdateAsync(existingPerson);
-
-            return Ok(existingPerson);
+            return Ok(person);
         }
 
         /// <summary>
@@ -107,16 +81,14 @@ namespace StaffSkill.Controllers
         public async Task<IActionResult> Delete(long id)
         {
             {
-                // Проверяем существование человека
-                var person = await _.GetByIdAsync(id);
-                if (person == null)
+                var isDeleted = await _service.Delete(id);
+
+                if (isDeleted)
                 {
-                    return NotFound($"Человек с ID {id} не найден");
+                    return NoContent();
                 }
 
-                // Если человек найден - удаляем
-                await _service.DeleteAsync(id);
-                return NoContent();
+                return NotFound();
             }
         }
     }
