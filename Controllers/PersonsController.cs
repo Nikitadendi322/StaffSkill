@@ -19,7 +19,7 @@ namespace StaffSkill.Controllers
         /// <summary>
         /// Возвращение массив обектов типа Person
         /// </summary>
-        
+
         [HttpGet]
         public async Task<ActionResult<List<Person>>> GetAll()
         {
@@ -30,7 +30,7 @@ namespace StaffSkill.Controllers
         /// <summary>
         /// Возвращает объект типа Person.
         /// </summary>
-        
+
         [HttpGet("{id}")]
         public async Task<ActionResult<Person>> GetById(long id)
         {
@@ -41,10 +41,15 @@ namespace StaffSkill.Controllers
         /// <summary>
         /// Создаёт нового сотрудника в системе с указанными навыками.
         /// </summary>
-        
+
         [HttpPost]
         public async Task<ActionResult<PersonDto>> Create(PersonDto personDto)
         {
+            if (!ModelState.IsValid) // Проверка валидации DTO
+            {
+                return BadRequest(ModelState);
+            }
+
             var person = new Person
             {
                 Name = personDto.Name,
@@ -66,10 +71,15 @@ namespace StaffSkill.Controllers
         /// Обновляет данные сотрудника согласно значениям, указанным в объекте Person в теле.
         /// Обновляет навыки сотрудника согласно указанному набору.
         /// </summary>
-        
+
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(long id, PersonDto personDto)
         {
+            if (!ModelState.IsValid) // Проверка валидации DTO
+            {
+                return BadRequest(ModelState);
+            }
+
             var existingPerson = await _repository.GetByIdAsync(id);
             if (existingPerson == null)
             {
@@ -83,11 +93,11 @@ namespace StaffSkill.Controllers
 
             // Обновление Skills
 
-            existingPerson.Skills=personDto.Skills.Select(s=> new Skill
+            existingPerson.Skills = personDto.Skills.Select(s => new Skill
             {
                 Name = s.Name,
                 Level = s.Level,
-                PersonId=id
+                PersonId = id
             }).ToList();
 
             await _repository.UpdateAsync(existingPerson);
@@ -98,12 +108,23 @@ namespace StaffSkill.Controllers
         /// <summary>
         /// Удаляет с указанным id сотрудника из системы.
         /// </summary>
-        
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(long id)
         {
-            await _repository.DeleteAsync(id);
-            return NoContent();
+            {
+                // Проверяем существование человека
+                var person = await _repository.GetByIdAsync(id);
+                if (person == null)
+                {
+                    return NotFound($"Человек с ID {id} не найден");
+                }
+
+                // Если человек найден - удаляем
+                await _repository.DeleteAsync(id);
+                return NoContent();
+            }
         }
     }
+
 }

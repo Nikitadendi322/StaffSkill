@@ -1,4 +1,6 @@
-﻿namespace StaffSkill.Core.Model
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace StaffSkill.Core.Model
 {
     public class Person
     {
@@ -17,6 +19,7 @@
         /// <summary>
         /// Отображаемое имя
         /// </summary>
+        
         public string DisplayName { get; set; }
 
         /// <summary>

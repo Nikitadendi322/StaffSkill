@@ -1,10 +1,13 @@
-﻿namespace StaffSkill.Core.Model
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace StaffSkill.Core.Model
 {
     public class Skill
     {
         /// <summary>
         /// Название навыка
         /// </summary>
+
         public string Name { get; set; }
 
         /// <summary>
@@ -15,6 +18,7 @@
         /// <summary>
         /// Уровень владения навыком (от 1 до 10)
         /// </summary>
+
         public byte Level { get; set; } // 1-10
 
         /// <summary>

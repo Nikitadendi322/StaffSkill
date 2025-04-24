@@ -2,11 +2,30 @@ using Microsoft.EntityFrameworkCore;
 using StaffSkill.Repository;
 using StaffSkill;
 using StaffSkill.Middleware;
+using Microsoft.AspNetCore.Mvc;
 
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .ConfigureApiBehaviorOptions(options =>
+    {
+        options.InvalidModelStateResponseFactory = context =>
+        {
+            var errors = context.ModelState
+                .Where(e => e.Value.Errors.Count > 0)
+                .ToDictionary(
+                    kvp => kvp.Key,
+                    kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray()
+                );
+
+            return new BadRequestObjectResult(new
+            {
+                Message = "Ошибки валидации",
+                Errors = errors
+            });
+        };
+    });
 
 // Добавляем DbContext
 builder.Services.AddDbContext<AppDbContext>(options =>
