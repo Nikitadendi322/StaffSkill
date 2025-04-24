@@ -2,6 +2,7 @@
 using StaffSkill.Core.Model;
 using StaffSkill.Dto;
 using StaffSkill.Repository;
+using StaffSkill.Service;
 
 namespace StaffSkill.Controllers
 {
@@ -9,39 +10,36 @@ namespace StaffSkill.Controllers
     [Route("api/v1/persons")]
     public class PersonsController : ControllerBase
     {
-        private readonly IPersonRepository _repository;
+        private readonly IPersonService _service;
 
-        public PersonsController(IPersonRepository repository)
+        public PersonsController(IPersonService service)
         {
-            _repository = repository;
+            _service = service;
         }
 
         /// <summary>
         /// Возвращение массив обектов типа Person
         /// </summary>
-
         [HttpGet]
         public async Task<ActionResult<List<Person>>> GetAll()
         {
-            var persons = await _repository.GetAllAsync();
+            var persons = await _service.GetAllAsync();
             return Ok(persons);
         }
 
         /// <summary>
         /// Возвращает объект типа Person.
         /// </summary>
-
         [HttpGet("{id}")]
         public async Task<ActionResult<Person>> GetById(long id)
         {
-            var person = await _repository.GetByIdAsync(id);
+            var person = await _service.GetByIdAsync(id);
             return person != null ? Ok(person) : NotFound();
         }
 
         /// <summary>
         /// Создаёт нового сотрудника в системе с указанными навыками.
         /// </summary>
-
         [HttpPost]
         public async Task<ActionResult<PersonDto>> Create(PersonDto personDto)
         {
@@ -61,7 +59,7 @@ namespace StaffSkill.Controllers
                 }).ToList()
             };
 
-            await _repository.AddAsync(person);
+            await _service.AddAsync(person);
 
             // Возвращаем созданную сущность Person
             return CreatedAtAction(nameof(GetById), new { id = person.Id }, person);
@@ -71,7 +69,6 @@ namespace StaffSkill.Controllers
         /// Обновляет данные сотрудника согласно значениям, указанным в объекте Person в теле.
         /// Обновляет навыки сотрудника согласно указанному набору.
         /// </summary>
-
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(long id, PersonDto personDto)
         {
@@ -80,19 +77,17 @@ namespace StaffSkill.Controllers
                 return BadRequest(ModelState);
             }
 
-            var existingPerson = await _repository.GetByIdAsync(id);
+            var existingPerson = await _service.GetAll();
             if (existingPerson == null)
             {
                 return NotFound();
             }
 
             //Обновление только разрешенного поля
-
-            existingPerson.Name = personDto.Name;
+            _service.Name = personDto.Name;
             existingPerson.DisplayName = personDto.DisplayName;
 
             // Обновление Skills
-
             existingPerson.Skills = personDto.Skills.Select(s => new Skill
             {
                 Name = s.Name,
@@ -100,7 +95,7 @@ namespace StaffSkill.Controllers
                 PersonId = id
             }).ToList();
 
-            await _repository.UpdateAsync(existingPerson);
+            await _service.UpdateAsync(existingPerson);
 
             return Ok(existingPerson);
         }
@@ -108,20 +103,19 @@ namespace StaffSkill.Controllers
         /// <summary>
         /// Удаляет с указанным id сотрудника из системы.
         /// </summary>
-
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(long id)
         {
             {
                 // Проверяем существование человека
-                var person = await _repository.GetByIdAsync(id);
+                var person = await _.GetByIdAsync(id);
                 if (person == null)
                 {
                     return NotFound($"Человек с ID {id} не найден");
                 }
 
                 // Если человек найден - удаляем
-                await _repository.DeleteAsync(id);
+                await _service.DeleteAsync(id);
                 return NoContent();
             }
         }

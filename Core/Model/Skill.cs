@@ -7,7 +7,6 @@ namespace StaffSkill.Core.Model
         /// <summary>
         /// Название навыка
         /// </summary>
-
         public string Name { get; set; }
 
         /// <summary>
@@ -18,7 +17,6 @@ namespace StaffSkill.Core.Model
         /// <summary>
         /// Уровень владения навыком (от 1 до 10)
         /// </summary>
-
         public byte Level { get; set; } // 1-10
 
         /// <summary>

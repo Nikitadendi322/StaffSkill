@@ -3,6 +3,7 @@ using StaffSkill.Repository;
 using StaffSkill;
 using StaffSkill.Middleware;
 using Microsoft.AspNetCore.Mvc;
+using StaffSkill.Service;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -33,6 +34,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 // Регистрируем репозиторий
 builder.Services.AddScoped<IPersonRepository, PersonRepository>();
+
+// Регистрация сервиса
+builder.Services.AddScoped<IPersonService, PersonService>();
 
 // Добавляем Swagger
 builder.Services.AddEndpointsApiExplorer();
